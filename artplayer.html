@@ -64,7 +64,7 @@
                 document.querySelector('#artplayer').innerHTML = '主播未开播或者直播间不存在'
             }
             else {
-                art.switch = text
+                art.switch = text.replace('http://','https://')
                 setTimeout(() => {
                     art.fullscreen=!art.fullscreen;
                     art.play()
