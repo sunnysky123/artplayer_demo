@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 
 <head>
     <meta charset="UTF-8">
@@ -8,9 +8,6 @@
     <title>德华</title>
     <script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
-    <script>
-        const vurl='https://al.flv.huya.com/src/1354740567-1354740567-5818566429829496832-2709604590-10057-A-0-1-imgplus.flv?wsSecret=3322b88e8a148580de3aa7e256f63fc8&wsTime=63972c28&seqid=162413588550916707652247305704&ctype=tars_mp&ver=1&txyp=o%3An4%3B&fs=bgct&&sphdcdn=al_7-tx_3-js_3-ws_7-bd_2-hw_2&sphdDC=huya&sphd=264_*-265_*&t=103&ratio=0&u=1624135885509&t=103&sv=2110211124'
-    </script>
     <style>
         #artplayer {
             height: 97vh
@@ -22,38 +19,60 @@
     </style>
 
 <body>
+    <div>请输入虎牙直播间号:<input type="text" id="rid" value="243547"><button onclick="startplay()">播放</button></div>
     <div id="artplayer"></div>
 </body>
 
 <script>
-    var art = new Artplayer({
-        container: '#artplayer',
-        autoplay: true,
-        isLive: true,
-        muted: true,
-        autoSize: true,
-        fullscreen: true,
-        url: vurl,
-        lang: 'zh-cn',
-        pip: true,
-        hotkey: false,
-        customType: {
-            flv: function (video, arturl) {
-                if (flvjs.isSupported()) {
-                    const flvPlayer = flvjs.createPlayer({
-                        type: 'flv',
-                        url: arturl,
-                        isLive: true,
-                        enableWorker: true,
-                    });
-                    flvPlayer.attachMediaElement(video);
-                    flvPlayer.load();
-                } else {
-                    art.notice.show = '不支持播放格式：flv';
-                }
+    let baseurl = 'https://service-rb8919vq-1252596964.gz.apigw.tencentcs.com/release/liveroom?id='
+    let art = null
+    let hlsurl = ''
+    function startplay() {
+        if (art != null) {
+            art.pause()
+            art.destroy()
+        }
+        art = new Artplayer({
+            container: '#artplayer',
+            isLive: true,
+            autoSize: true,
+            fullscreen: true,
+            lang: 'zh-cn',
+            pip: true,
+            hotkey: false,
+            customType: {
+                flv: function (video, arturl) {
+                    if (flvjs.isSupported()) {
+                        const flvPlayer = flvjs.createPlayer({
+                            type: 'flv',
+                            url: arturl,
+                            isLive: true,
+                            enableWorker: true,
+                        });
+                        flvPlayer.attachMediaElement(video);
+                        flvPlayer.load();
+                    } else {
+                        art.notice.show = '不支持播放格式：flv';
+                    }
+                },
             },
-        },
-    });
+        });
+        const room = document.querySelector('#rid').value
+        rurl = baseurl + room
+        const vurllist = fetch(rurl).then(response => response.text()).then(function (text) {
+            if (text == 'error') {
+                document.querySelector('#artplayer').innerHTML = '主播未开播或者直播间不存在'
+            }
+            else {
+                art.switch = text
+                setTimeout(() => {
+                    art.fullscreen=!art.fullscreen;
+                    art.play()
+                }, 500)
+            }
+        })
+
+    }
 </script>
 
 </html>
